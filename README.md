@@ -1,59 +1,93 @@
 # SHL Hiring Assessment 2026 — Spoken English Grammar Scoring
 
-Solution repository for the SHL Hiring Assessment 2026 grammar-scoring challenge.
+## Overview
 
-## Best confirmed Kaggle result
+This project presents a machine learning pipeline developed for the **SHL Hiring Assessment 2026** to predict the grammar proficiency score of spoken-English recordings.
 
-**Public leaderboard score: 0.3819**
+The task is formulated as a **continuous regression problem**, where each audio recording is assigned a grammar score between **0 and 5**.
 
-This is the score from our actual submission **`submission1.csv`**.
+The dataset consists of **769 labelled training recordings** and **216 evaluation recordings**. The audio files are provided as 16 kHz mono WAV recordings.
 
-The previously mentioned **0.3814** score was from a separate random CSV upload used only as a leaderboard check and is **not** our solution result.
+## Objective
 
-## Approach
+The objective is to estimate the grammar proficiency of a speaker directly from spoken English audio by learning relationships between speech characteristics and human-provided grammar scores.
 
-The solution treats the task as continuous regression from spoken-English audio (0–5). The notebook combines:
+The evaluation considers both:
 
-- pretrained speech representations
-- segment-level audio views
-- acoustic/prosodic features
-- leakage-safe out-of-fold regression
-- ensemble/stacking
-- validation and submission checks
+- **Pearson Correlation** — measures the relationship between predicted and actual scores.
+- **RMSE (Root Mean Squared Error)** — measures the prediction error.
 
-The dataset contains 769 labelled training recordings and 216 evaluation recordings.
+## Methodology
 
-## Repository contents
+The proposed pipeline combines multiple complementary sources of information from the speech recordings.
 
-- `solution.ipynb` — main documented solution notebook
-- `README.md` — project overview
-- `requirements.txt` — Python dependencies
-- `SUBMISSION_STATUS.md` — verified leaderboard/submission status
-- `.gitignore` — prevents accidental credential/cache uploads
+### 1. Pretrained Speech Representations
 
-## Submission format
+Pretrained self-supervised speech models are used to extract high-level representations from the audio recordings.
 
-The final prediction file must contain:
+These representations capture characteristics of speech that are difficult to represent using manually designed acoustic features alone.
+
+### 2. Segment-Level Audio Representation
+
+Instead of relying exclusively on a single representation of the complete recording, different temporal sections of the speech are considered.
+
+This allows the model to capture variations in pronunciation, fluency, speaking patterns, and other characteristics that may occur throughout a recording.
+
+### 3. Acoustic and Prosodic Features
+
+Handcrafted speech features are incorporated to capture interpretable characteristics such as:
+
+- spectral characteristics
+- MFCC statistics
+- energy
+- pitch
+- speaking activity
+- silence and pause characteristics
+- temporal speech properties
+
+### 4. Regression Models
+
+Regularized regression models are used to map the extracted representations to the continuous grammar score.
+
+Out-of-fold predictions are generated during validation to reduce information leakage and provide a reliable basis for model combination.
+
+### 5. Ensemble Learning
+
+Predictions from complementary model branches are combined using a second-level ensemble.
+
+The ensemble allows information from different speech representations and acoustic features to contribute to the final prediction.
+
+## Validation
+
+The modelling pipeline was evaluated using:
+
+- Out-of-fold validation
+- RMSE
+- Pearson correlation
+- Prediction distribution analysis
+- Robustness checks
+- Training-data RMSE
+
+The validation process was designed to ensure that the ensemble was not selected solely on the performance of a single train/validation split.
+
+## Results
+
+The final submitted solution achieved a **public Kaggle leaderboard score of 0.3819**.
+
+| Metric | Result |
+|---|---:|
+| Public Kaggle Score | **0.3819** |
+| Training Dataset | 769 recordings |
+| Evaluation Dataset | 216 recordings |
+| Prediction Range | 0–5 |
+
+## Project Structure
 
 ```text
-filename,label
-```
-
-with:
-
-- 216 rows
-- the exact filename order from `test.csv`
-- finite predictions
-- predictions constrained to `[0, 5]`
-
-## Reproducibility
-
-Run the notebook in the SHL Kaggle environment with the competition dataset mounted at the expected input path. The notebook includes the required training RMSE and validation/report sections.
-
-## Important
-
-Do **not** upload private competition audio/data to a public repository unless SHL explicitly permits redistribution.
-
-Do **not** upload Kaggle API credentials, tokens, or other secrets.
-
-The exact `submission1.csv` file that achieved 0.3819 is not included unless that exact file is available. Do not substitute another candidate and label it as the 0.3819 submission.
+shl-hiring-assessment-2026/
+│
+├── solution.ipynb
+├── README.md
+├── requirements.txt
+├── SUBMISSION_STATUS.md
+└── .gitignore
